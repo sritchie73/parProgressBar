@@ -12,4 +12,6 @@ Depends:
     R (>= 3.1.0)
 Imports:
     utils,
-    foreach
+    foreach,
+    iterators,
+    itertools
