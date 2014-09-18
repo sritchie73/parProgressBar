@@ -1,0 +1,16 @@
+Package: parProgressBar
+Type: Package
+Title: Reporting Progress in Parallel
+Version: 1.0
+Date: 2014-09-18
+Author: Who wrote it
+Authors@R: 'Scott Ritchie <sritchie73@gmail.com> [aut, cre]'
+Description: 
+  Utilities for reporting progress from parallel workers using txtProgressBar
+License: GPL-2
+Depends:
+  R (>= 3.1.0)
+Imports:
+  utils
+Suggests:
+  foreach
