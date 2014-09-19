@@ -9,9 +9,9 @@ Description: Utilities for reporting progress from parallel workers using
     txtProgressBar
 License: GPL-2
 Depends:
-    R (>= 3.1.0)
+    R (>= 3.1.0),
+    foreach
 Imports:
     utils,
-    foreach,
     iterators,
     itertools

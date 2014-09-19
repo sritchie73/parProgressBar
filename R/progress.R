@@ -10,7 +10,6 @@
 #'   until the \code{foreach} loop has finished running.
 #' @param indent an integer corresponding to the level of indentation. Each
 #'   indentation level corresponds to two spaces.
-#' @param nChunks The total number of chunks.
 #' @seealso \code{\link[utils]{txtProgressBar}}
 #' @name parProgress
 NULL
@@ -23,7 +22,9 @@ NULL
 #'   returned so it can be closed properly later.)
 #' @rdname parProgress
 #' @importFrom utils txtProgressBar
-setupParProgressLogs <- function(chunk, nChunks, indent) {
+#' @export
+setupParProgressLogs <- function(chunk, indent) {
+  nChunks <- numWorkers()
   chunkNum <- ceiling(chunk[1]/length(chunk))
   
   # To log progress, we will write our progress to a file for each chunk
@@ -58,6 +59,7 @@ setupParProgressLogs <- function(chunk, nChunks, indent) {
 #' @param i new value for the progress bar.
 #' @importFrom utils setTxtProgressBar
 #' @rdname parProgress
+#' @export
 updateParProgress <- function(pb, i) {
   setTxtProgressBar(pb, i)
 }
@@ -66,9 +68,13 @@ updateParProgress <- function(pb, i) {
 #'  \code{monitorProgress}: Monitor the progress of parallel workers.
 #' @rdname parProgress
 #' @import foreach
-monitorProgress <- function(nChunks, indent) {
+#' @export
+monitorProgress <- function(indent) {
   f <- NULL # Definition to turn off R CMD check NOTE
   init <- FALSE
+  
+  nChunks <- numWorkers()
+
   while(TRUE) {
     files <- list.files("run-progress")
     if (init & length(files) == 0) {
@@ -118,6 +124,7 @@ monitorProgress <- function(nChunks, indent) {
 #' @description 
 #'  \code{reportProgress}: Report the progress of a sequential loop.
 #' @rdname parProgress
+#' @export
 reportProgress <- function(current, nTasks, indent) {
   # Get progress from file
   conn <- file(file.path("run-progress", file="chunk1.log"), open="rt")
@@ -132,4 +139,14 @@ reportProgress <- function(current, nTasks, indent) {
   if (current == nTasks) {
     cat("\n")
   }
+}
+
+#' @description
+#'  \code{closeProgressBars}: clean up temporary files.
+#' @rdname parProgress
+#' @export
+closeProgressBars <- function() {
+  log.files <- file.path("run-progress", list.files("run-progress"))
+  unlink(log.files)
+  unlink("run-progress", recursive=TRUE)
 }

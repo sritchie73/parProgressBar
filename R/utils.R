@@ -21,7 +21,7 @@
 #' @importFrom iterators idiv
 #' @importFrom iterators nextElem
 #' @importFrom itertools isplitIndices
-#' @importFrom foreach getDoParWorkers
+#' @export
 ichunkTasks <- function(n) {
   cores <- getDoParWorkers()
   if (cores > 1) {
@@ -45,4 +45,16 @@ ichunkTasks <- function(n) {
   } else {
     isplitIndices(n, chunks=cores)
   }
+}
+
+#' Get the number of worker threads
+#' @export
+numWorkers <- function() {
+  nThreads <- getDoParWorkers()
+  if (nThreads > 1) {
+    nWorkers <- nThreads - 1
+  } else {
+    nWorkers <- nThreads
+  }
+  nWorkers
 }
