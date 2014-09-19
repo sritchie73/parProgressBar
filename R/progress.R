@@ -8,7 +8,7 @@
 #'   instances will be spawned, one for each core as setup by the parallel
 #'   backend. As a result no output will be sent back to the main R process
 #'   until the \code{foreach} loop has finished running.
-#' @param ind an integer corresponding to the level of indentation. Each
+#' @param indent an integer corresponding to the level of indentation. Each
 #'   indentation level corresponds to two spaces.
 #' @param nChunks The total number of chunks.
 #' @seealso \code{\link[utils]{txtProgressBar}}
@@ -23,8 +23,13 @@ NULL
 #'   returned so it can be closed properly later.)
 #' @rdname parProgress
 #' @importFrom utils txtProgressBar
-setupParProgressLogs <- function(chunk, nChunks, ind) {
+setupParProgressLogs <- function(chunk, nChunks, indent) {
   chunkNum <- ceiling(chunk[1]/length(chunk))
+  
+  # To log progress, we will write our progress to a file for each chunk
+  if(!file.exists("run-progress")) {
+    dir.create("run-progress")
+  }
   
   # Setup log file
   filename <- file.path("run-progress", paste0("chunk", chunkNum, ".log"))
@@ -40,10 +45,10 @@ setupParProgressLogs <- function(chunk, nChunks, ind) {
   barWidth <- 9 # for some reason txtProgressBar is 9 characters too wide.
   if (nChunks > 1) {
     # Multiple worker cores, prepend with "Worker N:"
-    progWidth = width - ind*2 - nchar("Worker ") - nchar(nChunks) - 1 - barWidth
+    progWidth = width - indent*2 - nchar("Worker ") - nchar(nChunks) - 1 - barWidth
   } else {
     # If only one worker core, no need to prepend with "Worker N:"
-    progWidth = width - ind*2 - barWidth
+    progWidth = width - indent*2 - barWidth
   }
   pb <- txtProgressBar(min, max, min, width=progWidth, style=3, file=logfile)
   list(pb, logfile)
@@ -61,7 +66,7 @@ updateParProgress <- function(pb, i) {
 #'  \code{monitorProgress}: Monitor the progress of parallel workers.
 #' @rdname parProgress
 #' @import foreach
-monitorProgress <- function(nChunks, ind) {
+monitorProgress <- function(nChunks, indent) {
   f <- NULL # Definition to turn off R CMD check NOTE
   init <- FALSE
   while(TRUE) {
@@ -95,13 +100,13 @@ monitorProgress <- function(nChunks, ind) {
       
       # Output sensibly
       num <- gsub("chunk|.log", "", f)
-      indent <- rep("  ", ind)
+      spaces <- rep("  ", indent)
       if (nChunks > 1) {
         nSpaces <- nchar(nChunks) - nchar(num)
-        cat(sep="", "\r", indent, "Worker ", rep(" ", nSpaces), num, ":", 
+        cat(sep="", "\r", spaces, "Worker ", rep(" ", nSpaces), num, ":", 
             progress, file=stdout())       
       } else {
-        cat(sep="", "\r", indent, progress, file=stdout())
+        cat(sep="", "\r", spaces, progress, file=stdout())
       }
       
     }
@@ -113,7 +118,7 @@ monitorProgress <- function(nChunks, ind) {
 #' @description 
 #'  \code{reportProgress}: Report the progress of a sequential loop.
 #' @rdname parProgress
-reportProgress <- function(ind) {
+reportProgress <- function(current, nTasks, indent) {
   # Get progress from file
   conn <- file(file.path("run-progress", file="chunk1.log"), open="rt")
   on.exit(close(conn))
@@ -123,5 +128,8 @@ reportProgress <- function(ind) {
   })
   
   # Output sensibly
-  cat(sep="", "\r", rep("  ", ind), progress, file=stdout())
+  cat(sep="", "\r", rep("  ", indent), progress, file=stdout())
+  if (current == nTasks) {
+    cat("\n")
+  }
 }

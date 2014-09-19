@@ -3,16 +3,10 @@
 \alias{ichunkTasks}
 \title{Iterator with master worker}
 \usage{
-ichunkTasks(verbose, n, cores)
+ichunkTasks(n)
 }
 \arguments{
-\item{verbose}{logical. Controls the type of iterator returned, see details.}
-
 \item{n}{Maximum index to generate.}
-
-\item{cores}{the number of cores to divide \code{n} across. If \code{verbose}
-is \code{TRUE}, \code{n} is distributed over \code{cores - 1}, while 1 core
-is reserved as the task monitor.}
 }
 \value{
 An iterator that returns -1 (for the master worker), and vectors of indices
@@ -25,12 +19,10 @@ number of pieces, using the \code{chunks} argument, or the maximum size of
 the pieces, using the \code{chunkSize} argument.
 }
 \details{
-If \code{verbose} is \code{FALSE}, the returned iterator is exactly the
- same as if calling \code{\link[itertools]{isplitIndices}}. If \code{TRUE},
- then the iterator is prepended with a -1. This allows for a
- \code{\link[foreach]{foreach}} loop to easily operate on chunks of tasks,
- while also designating one worker thread as the master of reporting
- progress (see \code{\link[=parProgress]{monitorProgress}}).
+Creates an iterator is prepended with a -1 if there are more than 1 threads.
+ This allows for a \code{\link[foreach]{foreach}} loop to easily operate on
+ chunks of tasks, while also designating one worker thread as the master of
+ reporting progress (see \code{\link[=parProgress]{monitorProgress}}).
 }
 \seealso{
 \code{\link[itertools]{isplitIndices}} \code{\link[iterators]{idiv}}
